@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Results - {{ analysis.stock_ticker }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-center">
+                <i class="fas fa-chart-line"></i> Analysis Results
+            </h1>
+            <h3 class="text-center text-muted">{{ analysis.stock_ticker }}</h3>
+            <p class="text-center text-muted">
+                <small><i class="fas fa-clock"></i> {{ analysis.created_at.strftime('%B %d, %Y at %I:%M %p') }}</small>
+            </p>
+        </div>
+    </div>
+    
+    <!-- Final Recommendation Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 
+                {% if analysis.recommendation in ['STRONG BUY', 'BUY'] %}bg-success
+                {% elif analysis.recommendation == 'HOLD' %}bg-warning
+                {% else %}bg-danger{% endif %} text-white">
+                <div class="card-body text-center p-4">
+                    <h2 class="display-4 mb-3">
+                        <i class="fas fa-trophy"></i> {{ analysis.recommendation }}
+                    </h2>
+                    <h3 class="mb-3">Overall Score: {{ analysis.final_score }}/100</h3>
+                    <div class="progress mb-3" style="height: 30px;">
+                        <div class="progress-bar bg-white text-dark fw-bold" 
+                             style="width: {{ analysis.final_score }}%;" role="progressbar" aria-valuenow="{{ analysis.final_score }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            {{ analysis.final_score }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Technical Analysis Card -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-chart-candlestick"></i> Technical Analysis
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Chart Preview -->
+                    <div class="text-center mb-3">
+                        <img src="{{ url_for('static', filename='uploads/' + analysis.chart_filename) }}" 
+                             alt="Chart" class="img-fluid rounded border" style="max-height: 200px;">
+                    </div>
+                    
+                    <!-- Trend Result -->
+                    <div class="alert 
+                        {% if analysis.technical_trend == 'UPTREND' %}alert-success
+                        {% elif analysis.technical_trend == 'SIDEWAYS' %}alert-warning
+                        {% else %}alert-danger{% endif %} text-center">
+                        <h3 class="mb-0">
+                            {% if analysis.technical_trend == 'UPTREND' %}
+                                <i class="fas fa-arrow-trend-up"></i> UPTREND
+                            {% elif analysis.technical_trend == 'SIDEWAYS' %}
+                                <i class="fas fa-arrows-left-right"></i> SIDEWAYS
+                            {% else %}
+                                <i class="fas fa-arrow-trend-down"></i> DOWNTREND
+                            {% endif %}
+                        </h3>
+                    </div>
+                    
+                    <!-- Metrics -->
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h5>Confidence</h5>
+                            <h3 class="text-primary">{{ "%.2f"|format(analysis.technical_confidence) }}%</h3>
+                        </div>
+                        <div class="col-6">
+                            <h5>Score</h5>
+                            <h3 class="text-primary">{{ "%.1f"|format(analysis.technical_score) }}/50</h3>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-info-circle"></i> 
+                        Based on CNN pattern recognition of candlestick chart
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fundamental Analysis Card -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-file-invoice-dollar"></i> Fundamental Analysis
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="mb-3">Financial Ratios:</h5>
+                    
+                    <table class="table table-hover">
+                        <tbody>
+                            <tr>
+                                <td><strong>P/E Ratio</strong></td>
+                                <td class="text-end">
+                                    {% if analysis.pe_ratio %}
+                                        {{ "%.2f"|format(analysis.pe_ratio) }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>PEG Ratio</strong></td>
+                                <td class="text-end">
+                                    {% if analysis.peg_ratio %}
+                                        {{ "%.2f"|format(analysis.peg_ratio) }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>ROE</strong></td>
+                                <td class="text-end">
+                                    {% if analysis.roe %}
+                                        {{ "%.2f"|format(analysis.roe) }}%
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Debt-to-Equity</strong></td>
+                                <td class="text-end">
+                                    {% if analysis.debt_equity %}
+                                        {{ "%.2f"|format(analysis.debt_equity) }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>P/B Ratio</strong></td>
+                                <td class="text-end">
+                                    {% if analysis.pb_ratio %}
+                                        {{ "%.2f"|format(analysis.pb_ratio) }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="text-center mt-3">
+                        <h5>Fundamental Score</h5>
+                        <h3 class="text-info">{{ "%.1f"|format(analysis.fundamental_score) }}/50</h3>
+                    </div>
+                    
+                    <hr>
+                    
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-info-circle"></i> 
+                        Based on key financial ratios from company reports
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg me-2">
+                <i class="fas fa-plus"></i> New Analysis
+            </a>
+            <a href="{{ url_for('history') }}" class="btn btn-secondary btn-lg">
+                <i class="fas fa-history"></i> View History
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

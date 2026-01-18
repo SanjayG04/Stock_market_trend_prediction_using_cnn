@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Stock Analysis{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center mb-4">
+                <i class="fas fa-chart-line"></i> Stock Analysis Dashboard
+            </h1>
+            <p class="text-center text-muted mb-5">
+                Upload a candlestick chart and enter a stock ticker to get comprehensive technical and fundamental analysis
+            </p>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-upload"></i> Analyze Stock</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('analyze') }}" enctype="multipart/form-data" id="analysisForm">
+                        
+                        <!-- Stock Ticker Input -->
+                        <div class="mb-4">
+                            <label for="stock_ticker" class="form-label">
+                                <i class="fas fa-tag"></i> Stock Ticker Symbol
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="stock_ticker" 
+                                   name="stock_ticker" placeholder="e.g., RELIANCE.NS, TCS.NS, INFY.NS" required>
+                            <div class="form-text">
+                                For Indian stocks, add .NS (NSE) or .BO (BSE) suffix. 
+                                Example: TATAMOTORS.NS
+                            </div>
+                        </div>
+                        
+                        <!-- Chart Image Upload -->
+                        <div class="mb-4">
+                            <label for="chart_image" class="form-label">
+                                <i class="fas fa-image"></i> Candlestick Chart Image
+                            </label>
+                            <input type="file" class="form-control form-control-lg" id="chart_image" 
+                                   name="chart_image" accept="image/png, image/jpeg, image/jpg" required>
+                            <div class="form-text">
+                                Upload a clear candlestick chart image (PNG, JPG). Max size: 16MB
+                            </div>
+                        </div>
+                        
+                        <!-- Image Preview -->
+                        <div class="mb-4" id="imagePreview" style="display: none;">
+                            <label class="form-label">Preview:</label>
+                            <div class="text-center">
+                                <img id="preview" src="" alt="Chart Preview" class="img-fluid border rounded" 
+                                     style="max-height: 300px;">
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                <i class="fas fa-chart-bar"></i> Analyze Stock
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Instructions Card -->
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> How to Use</h5>
+                </div>
+                <div class="card-body">
+                    <ol>
+                        <li>Enter the stock ticker symbol (use .NS for NSE or .BO for BSE)</li>
+                        <li>Upload a candlestick chart screenshot from your trading platform</li>
+                        <li>Click "Analyze Stock" to get comprehensive analysis</li>
+                        <li>View combined technical + fundamental analysis results</li>
+                    </ol>
+                    <p class="mb-0 text-muted">
+                        <strong>Tip:</strong> For best results, use charts with 50+ candlesticks, 
+                        visible price axis, and volume bars.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Image preview functionality
+    document.getElementById('chart_image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview').src = e.target.result;
+                document.getElementById('imagePreview').style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Form validation
+    document.getElementById('analysisForm').addEventListener('submit', function(e) {
+        const ticker = document.getElementById('stock_ticker').value;
+        const file = document.getElementById('chart_image').files[0];
+        
+        if (!ticker || !file) {
+            e.preventDefault();
+            alert('Please fill in all fields!');
+            return false;
+        }
+        
+        // Show loading state
+        const btn = document.getElementById('submitBtn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+        btn.disabled = true;
+    });
+</script>
+{% endblock %}
